@@ -14,6 +14,12 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] ESLint configuration
 - [x] Memory bank documentation
 - [x] Recipe system for common features
+- [x] Zimax offramp: Polygon to Naira with Access Bank
+  - `src/types/offramp.ts` - Type definitions for offramp requests/responses
+  - `src/lib/access-bank.ts` - Access Bank API integration for transfers
+  - `src/app/api/offramp/route.ts` - Offramp API endpoint
+  - `src/app/api/offramp/verify/route.ts` - Account verification endpoint
+  - `src/components/OfframpForm.tsx` - React form component with validation
 
 ## Current Structure
 
@@ -85,3 +91,4 @@ export async function GET() {
 | Date | Changes |
 |------|---------|
 | Initial | Template created with base setup |
+| 2026-06-12 | Added Zimax offramp feature (Polygon to Naira via Access Bank) |
