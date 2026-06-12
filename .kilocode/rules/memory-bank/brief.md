@@ -30,6 +30,14 @@ Users describe what they want to build to an AI assistant, which then expands th
 - Clean, minimal starting structure
 - Bun as package manager
 
+### Features Implemented
+
+- Zimax offramp from Polygon to Naira via Access Bank
+  - Account verification API endpoint
+  - Offramp processing API endpoint  
+  - React form with wallet address, amount, and account number fields
+  - Real-time Naira conversion display (1 USDC = ₦1,500)
+
 ### Nice to Have
 
 - Recipe system for common additions (database, auth)

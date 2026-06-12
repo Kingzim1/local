@@ -24,19 +24,38 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 ## Current Structure
 
 | File/Directory | Purpose | Status |
-|----------------|---------|--------|
-| `src/app/page.tsx` | Home page | ✅ Ready |
+|----------------|-----------------|--------|
+| `src/app/page.tsx` | Home page with offramp form | ✅ Complete |
 | `src/app/layout.tsx` | Root layout | ✅ Ready |
 | `src/app/globals.css` | Global styles | ✅ Ready |
+| `src/app/api/offramp/route.ts` | Offramp API endpoint | ✅ Complete |
+| `src/app/api/offramp/verify/route.ts` | Account verification API | ✅ Complete |
+| `src/components/OfframpForm.tsx` | Offramp form component | ✅ Complete |
+| `src/lib/access-bank.ts` | Access Bank integration | ✅ Complete |
+| `src/types/offramp.ts` | Type definitions | ✅ Complete |
 | `.kilocode/` | AI context & recipes | ✅ Ready |
 
 ## Current Focus
 
-The template is ready. Next steps depend on user requirements:
+The Zimax offramp feature is implemented. The application provides:
 
-1. What type of application to build
-2. What features are needed
-3. Design/branding preferences
+1. **OfframpForm** (`src/components/OfframpForm.tsx`) - React form accepting:
+   - Polygon wallet address
+   - USDC amount
+   - Access Bank account number (with verification)
+
+2. **API Routes**:
+   - `POST /api/offramp` - Process offramp transactions
+   - `GET /api/offramp/verify?accountNumber=X` - Verify Access Bank accounts
+
+3. **Integration**: `src/lib/access-bank.ts` handles Access Bank API calls
+
+**Required Environment Variables** (add to `.env.local`):
+```
+ACCESS_BANK_API_KEY=your_api_key_here
+ACCESS_BANK_CLIENT_KEY=your_client_key_here
+ACCESS_BANK_API_URL=https://api.accessbankplc.com
+```
 
 ## Quick Start Guide
 
