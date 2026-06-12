@@ -1,4 +1,4 @@
-import { processOfframp } from "@/lib/access-bank";
+import { processOfframp } from "@/lib/payment-gateway";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 

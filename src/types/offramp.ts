@@ -19,14 +19,20 @@ export interface BankAccount {
 }
 
 export interface ExchangeRate {
-  usdcToNaira: number;
+  zimaxToNaira: number;
   lastUpdated: string;
 }
 
-export interface AccessBankConfig {
-  apiKey: string;
+export interface PaystackConfig {
+  secretKey: string;
+  publicKey: string;
   baseUrl: string;
-  clientKey: string;
+}
+
+export interface FlutterwaveConfig {
+  secretKey: string;
+  publicKey: string;
+  baseUrl: string;
 }
 
 export const BANK_CODES: Record<string, string> = {

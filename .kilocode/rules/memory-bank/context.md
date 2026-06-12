@@ -14,9 +14,9 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 - [x] ESLint configuration
 - [x] Memory bank documentation
 - [x] Recipe system for common features
-- [x] Zimax offramp: Polygon to Naira with Access Bank
+- [x] Zimax offramp: Polygon to Naira with Paystack/Flutterwave
   - `src/types/offramp.ts` - Type definitions for offramp requests/responses
-  - `src/lib/access-bank.ts` - Access Bank API integration for transfers
+  - `src/lib/payment-gateway.ts` - Paystack/Flutterwave API integration
   - `src/app/api/offramp/route.ts` - Offramp API endpoint
   - `src/app/api/offramp/verify/route.ts` - Account verification endpoint
   - `src/components/OfframpForm.tsx` - React form component with validation
@@ -31,7 +31,7 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
 | `src/app/api/offramp/route.ts` | Offramp API endpoint | ✅ Complete |
 | `src/app/api/offramp/verify/route.ts` | Account verification API | ✅ Complete |
 | `src/components/OfframpForm.tsx` | Offramp form component | ✅ Complete |
-| `src/lib/access-bank.ts` | Access Bank integration | ✅ Complete |
+| `src/lib/payment-gateway.ts` | Paystack/Flutterwave integration | ✅ Complete |
 | `src/types/offramp.ts` | Type definitions | ✅ Complete |
 | `.kilocode/` | AI context & recipes | ✅ Ready |
 
@@ -41,20 +41,22 @@ The Zimax offramp feature is implemented. The application provides:
 
 1. **OfframpForm** (`src/components/OfframpForm.tsx`) - React form accepting:
    - Polygon wallet address
-   - USDC amount
+   - ZIMAX amount
    - Access Bank account number (with verification)
 
 2. **API Routes**:
    - `POST /api/offramp` - Process offramp transactions
    - `GET /api/offramp/verify?accountNumber=X` - Verify Access Bank accounts
 
-3. **Integration**: `src/lib/access-bank.ts` handles Access Bank API calls
+3. **Integration**: `src/lib/payment-gateway.ts` handles Paystack/Flutterwave API calls
 
 **Required Environment Variables** (add to `.env.local`):
 ```
-ACCESS_BANK_API_KEY=your_api_key_here
-ACCESS_BANK_CLIENT_KEY=your_client_key_here
-ACCESS_BANK_API_URL=https://api.accessbankplc.com
+PAYSTACK_SECRET_KEY=your_paystack_secret_key
+PAYSTACK_PUBLIC_KEY=your_paystack_public_key
+FLUTTERWAVE_SECRET_KEY=your_flutterwave_secret_key
+FLUTTERWAVE_PUBLIC_KEY=your_flutterwave_public_key
+PAYMENT_GATEWAY=paystack # or flutterwave
 ```
 
 ## Quick Start Guide
@@ -110,4 +112,4 @@ export async function GET() {
 | Date | Changes |
 |------|---------|
 | Initial | Template created with base setup |
-| 2026-06-12 | Added Zimax offramp feature (Polygon to Naira via Access Bank) |
+| 2026-06-12 | Added Zimax offramp feature (Polygon to Naira via Paystack/Flutterwave) |

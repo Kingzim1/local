@@ -32,11 +32,11 @@ Users describe what they want to build to an AI assistant, which then expands th
 
 ### Features Implemented
 
-- Zimax offramp from Polygon to Naira via Access Bank
+- Zimax offramp from Polygon to Naira via Paystack/Flutterwave
   - Account verification API endpoint
   - Offramp processing API endpoint  
   - React form with wallet address, amount, and account number fields
-  - Real-time Naira conversion display (1 USDC = ₦1,500)
+  - Real-time Naira conversion display (1 ZIMAX = ₦1,500)
 
 ### Nice to Have
 

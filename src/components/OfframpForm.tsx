@@ -71,7 +71,7 @@ export default function OfframpForm() {
       <div className="mb-4 p-3 bg-neutral-700 rounded">
         <p className="text-sm text-neutral-300">Exchange Rate</p>
         <p className="text-lg font-semibold text-white">
-          1 USDC = ₦1,500 NGN
+          1 ZIMAX = ₦1,500 NGN
         </p>
         {amount && (
           <p className="text-sm text-neutral-400 mt-1">
@@ -97,7 +97,7 @@ export default function OfframpForm() {
 
         <div>
           <label className="block text-sm font-medium text-neutral-300 mb-1">
-            USDC Amount
+            ZIMAX Amount
           </label>
           <input
             type="number"

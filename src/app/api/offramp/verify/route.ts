@@ -1,4 +1,4 @@
-import { verifyBankAccount } from "@/lib/access-bank";
+import { verifyBankAccount } from "@/lib/payment-gateway";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
