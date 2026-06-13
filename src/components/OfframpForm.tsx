@@ -2,15 +2,12 @@
 
 import { useState, useEffect } from "react";
 
-declare global {
-  interface Window {
-    ethereum?: {
-      request: (args: { method: string }) => Promise<string[]>;
-      on: (event: string, callback: (accounts: string[]) => void) => void;
-      removeListener: (event: string, callback: (accounts: string[]) => void) => void;
-    };
-  }
-}
+type EthereumProvider = {
+  request: (args: { method: string }) => Promise<string[]>;
+  on?: (event: string, callback: (accounts: string[]) => void) => void;
+  removeListener?: (event: string, callback: (accounts: string[]) => void) => void;
+  isMetaMask?: boolean;
+};
 
 export default function OfframpForm() {
   const [walletAddress, setWalletAddress] = useState("");
@@ -25,6 +22,57 @@ export default function OfframpForm() {
     message: string;
     transactionId?: string;
   } | null>(null);
+
+  const connectWallet = async () => {
+    setConnecting(true);
+    setConnectionError(null);
+
+    if (typeof window === "undefined") {
+      setConnectionError("Window is not available");
+      setConnecting(false);
+      return;
+    }
+
+    const provider = (window as { ethereum?: EthereumProvider }).ethereum;
+    if (!provider) {
+      setConnectionError("MetaMask is not installed. Please install the MetaMask extension.");
+      setConnecting(false);
+      return;
+    }
+
+    try {
+      const accounts = await provider.request({ method: "eth_requestAccounts" });
+      if (accounts && accounts.length > 0) {
+        setWalletAddress(accounts[0]);
+      } else {
+        setConnectionError("No accounts found. Please create or import a wallet.");
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to connect to MetaMask";
+      setConnectionError(message);
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const provider = (window as { ethereum?: EthereumProvider }).ethereum;
+    if (!provider) return;
+
+    const handleAccountsChanged = (accounts: string[]) => {
+      if (accounts.length === 0) {
+        setWalletAddress("");
+      } else if (!walletAddress) {
+        setWalletAddress(accounts[0]);
+      }
+    };
+
+    provider.on?.("accountsChanged", handleAccountsChanged);
+    return () => {
+      provider.removeListener?.("accountsChanged", handleAccountsChanged);
+    };
+  }, [walletAddress]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,49 +122,6 @@ export default function OfframpForm() {
 
   const nairaAmount = amount ? (parseFloat(amount) * 1500).toLocaleString() : "0";
 
-  const connectWallet = async () => {
-    const provider = window.ethereum;
-    if (!provider) {
-      setConnectionError("MetaMask is not installed. Please install the MetaMask extension.");
-      return;
-    }
-
-    setConnecting(true);
-    setConnectionError(null);
-
-    try {
-      const accounts = await provider.request({ method: "eth_requestAccounts" });
-      if (accounts && accounts.length > 0) {
-        setWalletAddress(accounts[0]);
-      } else {
-        setConnectionError("No accounts found. Please create or import a wallet.");
-      }
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Failed to connect to MetaMask";
-      setConnectionError(message);
-    } finally {
-      setConnecting(false);
-    }
-  };
-
-  useEffect(() => {
-    const provider = window.ethereum;
-    if (!provider) return;
-
-    const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length === 0) {
-        setWalletAddress("");
-      } else if (!walletAddress) {
-        setWalletAddress(accounts[0]);
-      }
-    };
-
-    provider.on?.("accountsChanged", handleAccountsChanged);
-    return () => {
-      provider.removeListener?.("accountsChanged", handleAccountsChanged);
-    };
-  }, [walletAddress]);
-
   return (
     <div className="max-w-md mx-auto p-6 bg-neutral-800 rounded-lg">
       <h2 className="text-2xl font-bold text-white mb-6">
@@ -149,14 +154,14 @@ export default function OfframpForm() {
               className="flex-1 px-3 py-2 bg-neutral-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-<button
-               type="button"
-               onClick={connectWallet}
-               disabled={connecting}
-               className="px-3 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 text-white rounded transition text-sm"
-             >
-               {connecting ? "Connecting..." : walletAddress ? "Connected" : "Connect"}
-             </button>
+            <button
+              type="button"
+              onClick={connectWallet}
+              disabled={connecting}
+              className="px-3 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 text-white rounded transition text-sm"
+            >
+              {connecting ? "Connecting..." : walletAddress ? "Connected" : "Connect"}
+            </button>
           </div>
           {connectionError && (
             <p className="text-xs text-red-400 mt-1">{connectionError}</p>
