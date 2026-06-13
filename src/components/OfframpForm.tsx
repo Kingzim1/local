@@ -3,10 +3,51 @@
 import { useState, useEffect } from "react";
 
 type EthereumProvider = {
-  request: (args: { method: string }) => Promise<string[]>;
-  on?: (event: string, callback: (accounts: string[]) => void) => void;
-  removeListener?: (event: string, callback: (accounts: string[]) => void) => void;
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  on?: (event: string, callback: (...args: unknown[]) => void) => void;
+  removeListener?: (event: string, callback: (...args: unknown[]) => void) => void;
   isMetaMask?: boolean;
+  chainId?: string;
+};
+
+const POLYGON_CHAIN_ID = "0x89"; // 137 in hex
+
+const switchToPolygon = async (provider: EthereumProvider): Promise<boolean> => {
+  try {
+    await provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: POLYGON_CHAIN_ID }],
+    });
+    return true;
+  } catch (switchError: unknown) {
+    const error = switchError as { code?: number };
+    if (error.code === 4001) {
+      console.log("User rejected network switch");
+      return false;
+    }
+    try {
+      await provider.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: POLYGON_CHAIN_ID,
+            chainName: "Polygon Mainnet",
+            nativeCurrency: {
+              name: "MATIC",
+              symbol: "MATIC",
+              decimals: 18,
+            },
+            rpcUrls: ["https://polygon-rpc.com"],
+            blockExplorerUrls: ["https://polygonscan.com"],
+          },
+        ],
+      });
+      return true;
+    } catch (addError: unknown) {
+      console.error("Failed to add Polygon network:", addError);
+      return false;
+    }
+  }
 };
 
 export default function OfframpForm() {
@@ -43,9 +84,17 @@ export default function OfframpForm() {
     }
 
     try {
-      const accounts = await provider.request({ method: "eth_requestAccounts" });
+      const accounts = (await provider.request({ method: "eth_requestAccounts" })) as string[];
       if (accounts && accounts.length > 0) {
         setWalletAddress(accounts[0]);
+
+        const chainId = (await provider.request({ method: "eth_chainId" })) as string;
+        if (chainId !== POLYGON_CHAIN_ID) {
+          const switched = await switchToPolygon(provider);
+          if (!switched) {
+            setConnectionError("Please switch to Polygon Mainnet in MetaMask manually.");
+          }
+        }
       } else {
         setConnectionError("No accounts found. Please create or import a wallet.");
       }
@@ -62,17 +111,29 @@ export default function OfframpForm() {
     const provider = (window as { ethereum?: EthereumProvider }).ethereum;
     if (!provider) return;
 
-    const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length === 0) {
+    const handleAccountsChanged = (accounts: unknown) => {
+      const accountsArray = accounts as string[];
+      if (accountsArray.length === 0) {
         setWalletAddress("");
       } else if (!walletAddress) {
-        setWalletAddress(accounts[0]);
+        setWalletAddress(accountsArray[0]);
+      }
+    };
+
+    const handleChainChanged = (chainId: unknown) => {
+      const id = chainId as string;
+      if (id !== POLYGON_CHAIN_ID) {
+        setConnectionError("Please switch to Polygon Mainnet in MetaMask.");
+      } else {
+        setConnectionError(null);
       }
     };
 
     provider.on?.("accountsChanged", handleAccountsChanged);
+    provider.on?.("chainChanged", handleChainChanged);
     return () => {
       provider.removeListener?.("accountsChanged", handleAccountsChanged);
+      provider.removeListener?.("chainChanged", handleChainChanged);
     };
   }, [walletAddress]);
 
