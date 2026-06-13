@@ -22,8 +22,9 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - `src/components/OfframpForm.tsx` - React form component with validation
 - [x] Added MetaMask wallet connection to OfframpForm
   - Connect button for automatic wallet address retrieval
+  - Auto-switch to Polygon Mainnet (chain ID 0x89)
+  - Chain change listener for network validation
   - Error handling for connection failures
-  - Account change listener for wallet updates
 - [x] Upgraded all dependencies to latest versions
   - Next.js 16.2.9, React 19.2.7, TypeScript 6.0.3
   - Tailwind CSS 4.3.1, ESLint 9.39.4
@@ -124,4 +125,4 @@ Run `bun outdated` to check for updates, then update `package.json` versions.
 |------|---------|
 | Initial | Template created with base setup |
 | 2026-06-12 | Added Zimax offramp feature (Polygon to Naira via Paystack/Flutterwave) |
-| 2026-06-13 | Added MetaMask wallet connection, upgraded dependencies to latest versions |
+| 2026-06-13 | Added MetaMask wallet connection with Polygon auto-switch, upgraded dependencies |
