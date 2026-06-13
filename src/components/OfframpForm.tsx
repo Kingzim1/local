@@ -15,7 +15,7 @@ declare global {
 export default function OfframpForm() {
   const [walletAddress, setWalletAddress] = useState("");
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   const [amount, setAmount] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
@@ -75,44 +75,47 @@ export default function OfframpForm() {
   const nairaAmount = amount ? (parseFloat(amount) * 1500).toLocaleString() : "0";
 
   const connectWallet = async () => {
-    if (!window.ethereum) {
-      setConnectionError("MetaMask is not installed");
+    const provider = window.ethereum;
+    if (!provider) {
+      setConnectionError("MetaMask is not installed. Please install the MetaMask extension.");
       return;
     }
 
+    setConnecting(true);
+    setConnectionError(null);
+
     try {
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const accounts = await provider.request({ method: "eth_requestAccounts" });
       if (accounts && accounts.length > 0) {
         setWalletAddress(accounts[0]);
-        setIsConnected(true);
-        setConnectionError(null);
+      } else {
+        setConnectionError("No accounts found. Please create or import a wallet.");
       }
     } catch (error: unknown) {
-      setConnectionError(
-        error instanceof Error ? error.message : "Failed to connect to MetaMask"
-      );
-      setIsConnected(false);
+      const message = error instanceof Error ? error.message : "Failed to connect to MetaMask";
+      setConnectionError(message);
+    } finally {
+      setConnecting(false);
     }
   };
 
   useEffect(() => {
-    if (window.ethereum) {
-      const handleAccountsChanged = (accounts: string[]) => {
-        if (accounts.length === 0) {
-          setIsConnected(false);
-          setWalletAddress("");
-        } else {
-          setWalletAddress(accounts[0]);
-          setIsConnected(true);
-        }
-      };
+    const provider = window.ethereum;
+    if (!provider) return;
 
-      window.ethereum.on("accountsChanged", handleAccountsChanged);
-      return () => {
-        window.ethereum?.removeListener("accountsChanged", handleAccountsChanged);
-      };
-    }
-  }, []);
+    const handleAccountsChanged = (accounts: string[]) => {
+      if (accounts.length === 0) {
+        setWalletAddress("");
+      } else if (!walletAddress) {
+        setWalletAddress(accounts[0]);
+      }
+    };
+
+    provider.on?.("accountsChanged", handleAccountsChanged);
+    return () => {
+      provider.removeListener?.("accountsChanged", handleAccountsChanged);
+    };
+  }, [walletAddress]);
 
   return (
     <div className="max-w-md mx-auto p-6 bg-neutral-800 rounded-lg">
@@ -146,13 +149,14 @@ export default function OfframpForm() {
               className="flex-1 px-3 py-2 bg-neutral-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
-            <button
-              type="button"
-              onClick={connectWallet}
-              className="px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition text-sm"
-            >
-              {isConnected ? "Connected" : "Connect"}
-            </button>
+<button
+               type="button"
+               onClick={connectWallet}
+               disabled={connecting}
+               className="px-3 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 text-white rounded transition text-sm"
+             >
+               {connecting ? "Connecting..." : walletAddress ? "Connected" : "Connect"}
+             </button>
           </div>
           {connectionError && (
             <p className="text-xs text-red-400 mt-1">{connectionError}</p>
