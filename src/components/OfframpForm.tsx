@@ -75,10 +75,8 @@ export default function OfframpForm() {
     }
 
     const provider = (window as { ethereum?: EthereumProvider }).ethereum;
-    console.log("Ethereum provider:", provider);
-
     if (!provider) {
-      setConnectionError("MetaMask not detected. Please ensure the extension is installed and unlocked. Refresh the page after unlocking MetaMask.");
+      setConnectionError("MetaMask not detected. Please ensure the extension is installed and unlocked.");
       setConnecting(false);
       return;
     }
