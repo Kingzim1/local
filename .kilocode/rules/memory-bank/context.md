@@ -20,6 +20,10 @@ The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. I
   - `src/app/api/offramp/route.ts` - Offramp API endpoint
   - `src/app/api/offramp/verify/route.ts` - Account verification endpoint
   - `src/components/OfframpForm.tsx` - React form component with validation
+- [x] Added MetaMask wallet connection to OfframpForm
+  - Connect button for automatic wallet address retrieval
+  - Error handling for connection failures
+  - Account change listener for wallet updates
 
 ## Current Structure
 

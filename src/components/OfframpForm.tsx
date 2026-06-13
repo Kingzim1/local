@@ -1,9 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string }) => Promise<string[]>;
+      on: (event: string, callback: (accounts: string[]) => void) => void;
+      removeListener: (event: string, callback: (accounts: string[]) => void) => void;
+    };
+  }
+}
 
 export default function OfframpForm() {
   const [walletAddress, setWalletAddress] = useState("");
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
   const [amount, setAmount] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [accountName, setAccountName] = useState("");
@@ -62,6 +74,46 @@ export default function OfframpForm() {
 
   const nairaAmount = amount ? (parseFloat(amount) * 1500).toLocaleString() : "0";
 
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      setConnectionError("MetaMask is not installed");
+      return;
+    }
+
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      if (accounts && accounts.length > 0) {
+        setWalletAddress(accounts[0]);
+        setIsConnected(true);
+        setConnectionError(null);
+      }
+    } catch (error: unknown) {
+      setConnectionError(
+        error instanceof Error ? error.message : "Failed to connect to MetaMask"
+      );
+      setIsConnected(false);
+    }
+  };
+
+  useEffect(() => {
+    if (window.ethereum) {
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (accounts.length === 0) {
+          setIsConnected(false);
+          setWalletAddress("");
+        } else {
+          setWalletAddress(accounts[0]);
+          setIsConnected(true);
+        }
+      };
+
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      return () => {
+        window.ethereum?.removeListener("accountsChanged", handleAccountsChanged);
+      };
+    }
+  }, []);
+
   return (
     <div className="max-w-md mx-auto p-6 bg-neutral-800 rounded-lg">
       <h2 className="text-2xl font-bold text-white mb-6">
@@ -85,14 +137,26 @@ export default function OfframpForm() {
           <label className="block text-sm font-medium text-neutral-300 mb-1">
             Polygon Wallet Address
           </label>
-          <input
-            type="text"
-            value={walletAddress}
-            onChange={(e) => setWalletAddress(e.target.value)}
-            placeholder="0x..."
-            className="w-full px-3 py-2 bg-neutral-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={walletAddress}
+              onChange={(e) => setWalletAddress(e.target.value)}
+              placeholder="0x..."
+              className="flex-1 px-3 py-2 bg-neutral-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <button
+              type="button"
+              onClick={connectWallet}
+              className="px-3 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded transition text-sm"
+            >
+              {isConnected ? "Connected" : "Connect"}
+            </button>
+          </div>
+          {connectionError && (
+            <p className="text-xs text-red-400 mt-1">{connectionError}</p>
+          )}
         </div>
 
         <div>
